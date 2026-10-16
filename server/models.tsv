@@ -7,6 +7,12 @@ orn	main	current	ornith-ai/Ornith-1.5-35B-A3B-GGUF	Ornith-1.5-35B-Q6_K.gguf	2920
 fn	main-1of2	current	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-Coder-GGUF	IQ1_M/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00001-of-00002.gguf	29608446496	e11083ba855e7666b48ea3f2db6a9c3a20c18751a012cc24f948de91b7087fad	flashnext
 fn	main-2of2	current	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-Coder-GGUF	IQ1_M/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00002-of-00002.gguf	28800138432	316b46f3a2dbd68c900f43136ab9449f9dcc3725dfd8c794847c204bc161e113	flashnext
 mel	main	current	JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF	Mellum2.1-12B-A2.5B-Thinking-Q8_0.gguf	12925417760	69e0ac02a16586c2c9e991f1e3b8a1eb403882e7ab9e69ea01eb23dbbbc6841f	mellum21
+q38	main	compare	unsloth/Qwen3.8-27B-GGUF	Qwen3.8-27B-UD-Q6_K.gguf	21983677344	c9c206812fbe4ac7b76a729e25928b63f2ae89d37f69da7a71c20aec763cd436	.
+aw	main	compare	unsloth/Qwen-AgentWorld-35B-A3B-GGUF	Qwen-AgentWorld-35B-A3B-UD-Q6_K.gguf	29308321024	cce7ec62095093b9415afa0aa68efa29dbae892e87d2c663a0f864908f60b9b6	agentworld
+ff	main-1of2	compare	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF	IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf	47039860096	219ea929900dfa9ef091f3aa473fdba6874b65fcb36526d7d851ac9e95856d15	flashnext-full
+ff	main-2of2	compare	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF	IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf	28800138432	316b46f3a2dbd68c900f43136ab9449f9dcc3725dfd8c794847c204bc161e113	flashnext-full
+c7	main	local-convert	Qwen/Qwen2.5-Coder-7B-Instruct	qwen2.5-coder-7b-q8_0.gguf	8098525760	c4b171ef14a7a498e73782085543818620a2f3c76143960a73d1882fa6334f65	.
+c1	main	local-convert	Qwen/Qwen2.5-Coder-1.5B-Instruct	qwen2.5-coder-1.5b-f16.gguf	3093669504	f1c4072853e42b29cec7eb3509f71bd129f0bb90f8d596868eb54d9ece84ba01	.
 bolt	main	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	22018326528	91d63363e782c8a3d5f4be42816eba8e0d42dd2530bd07a7d0d2dc440599af75	nemotron-bolt
 bolt	mmproj	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	mmproj-NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	1733692736	0ee891eadc7bf0cae6289b249c74eb1ef420534351f6ef8b64d49f0ca6a926b0	nemotron-bolt
 bolt	draft	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr.gguf	998242560	080e1ea41c9562a7804dbf30c6fbd4d17e216c6b8ff666f88e6edb1816010194	nemotron-bolt

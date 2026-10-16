@@ -1,0 +1,14 @@
+# secrets and local-only files (never commit an API key)
+llm-api-key
+*.key
+.env
+.env.*
+
+# installer backups and logs
+*.bak-*
+*.log
+
+# editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp

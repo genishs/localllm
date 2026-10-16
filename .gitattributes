@@ -1,0 +1,9 @@
+# Windows scripts are served raw (raw.githubusercontent.com) and must keep the exact bytes committed.
+*.ps1 -text
+*.bat -text
+*.cmd -text
+
+# Linux-side files must never get CRLF (they are copied to the server as-is).
+*.sh text eol=lf
+*.ini text eol=lf
+*.tsv text eol=lf

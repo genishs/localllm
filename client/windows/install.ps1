@@ -29,17 +29,25 @@ $Sha = @{
 }
 $DefaultPort = 8080
 
-# friendly names for known model ids (from the server presets); unknown ids are shown as-is
+# friendly names (and context size when it is not the default 65536) for known model ids, taken from the
+# server presets. Unknown ids are shown as-is with the default context.
+$DefaultContext = 65536
 $Known = @{
-  cn   = "Qwen3-Coder-Next 80B-A3B | Q4_K_M"
-  q36  = "Qwen3.6-35B-A3B | UD-Q6_K + MTP"
-  orn  = "Ornith-1.5-35B-A3B | Q6_K + MTP"
-  mg   = "Muse Glimmer 30B | Q4_K_XL + DFlash"
-  fn   = "Qwen3.8-Flash-Next Coder (pruned) | IQ1_M"
-  bolt = "Nemotron 3.5 Bolt 74B-A9B | 2-bit QAT + DFlash"
-  lfm  = "LFM2.5-24B-A2B | Q8_0"
-  mcv  = "MiniCPM-V 4.7 35B-A3B | Q6_K + DSpark"
-  mel  = "Mellum2.1-12B-A2.5B Thinking | Q8_0"
+  cn   = @{ name = "Qwen3-Coder-Next 80B-A3B | Q4_K_M" }
+  q36  = @{ name = "Qwen3.6-35B-A3B | UD-Q6_K + MTP" }
+  mg   = @{ name = "Muse Glimmer 30B | Q4_K_XL + DFlash" }
+  orn  = @{ name = "Ornith-1.5-35B-A3B | Q6_K + MTP" }
+  fn   = @{ name = "Qwen3.8-Flash-Next Coder (pruned) | IQ1_M" }
+  mel  = @{ name = "Mellum2.1-12B-A2.5B Thinking | Q8_0" }
+  bolt = @{ name = "Nemotron 3.5 Bolt 74B-A9B | 2-bit QAT + DFlash" }
+  lfm  = @{ name = "LFM2.5-24B-A2B | Q8_0" }
+  mcv  = @{ name = "MiniCPM-V 4.7 35B-A3B | Q6_K + DSpark" }
+  q38  = @{ name = "Qwen3.8-27B (dense) | UD-Q6_K + MTP" }
+  aw   = @{ name = "Qwen-AgentWorld 35B-A3B | UD-Q6_K [world model - not a coding agent]" }
+  ff   = @{ name = "Qwen3.8-Flash-Next (full) | IQ3_XXS" }
+  c7   = @{ name = "Qwen2.5-Coder-7B | Q8_0 [32K context]"; context = 32768 }
+  c7r  = @{ name = "Qwen2.5-Coder-7B + React LoRA | Q8_0 [32K context]"; context = 32768 }
+  c1   = @{ name = "Qwen2.5-Coder-1.5B | F16 [32K context]"; context = 32768 }
 }
 
 function Ok($m)   { Write-Host "   OK  $m" -ForegroundColor Green }
@@ -123,6 +131,29 @@ function Get-ModelIds([string]$url, [string]$key) {
     try { if ($_.Exception.Response) { $code = [int]$_.Exception.Response.StatusCode } } catch {}
     return @{ Ok = $false; Ids = @(); Status = $code; Message = $_.Exception.Message }
   }
+}
+
+# parsed JSON (PSCustomObject / arrays / scalars) -> ordered dictionaries and ArrayLists, so keys can be set by name
+# and everything the installer does not manage is written back unchanged
+function ConvertTo-Plain($v) {
+  if ($null -eq $v) { return $null }
+  if ($v -is [string] -or $v -is [ValueType]) { return $v }
+  if ($v -is [System.Collections.IDictionary]) {
+    $o = [ordered]@{}
+    foreach ($k in $v.Keys) { $o[[string]$k] = ConvertTo-Plain $v[$k] }
+    return $o
+  }
+  if ($v -is [pscustomobject]) {
+    $o = [ordered]@{}
+    foreach ($p in $v.PSObject.Properties) { $o[$p.Name] = ConvertTo-Plain $p.Value }
+    return $o
+  }
+  if ($v -is [System.Collections.IEnumerable]) {
+    $l = New-Object System.Collections.ArrayList
+    foreach ($e in $v) { [void]$l.Add((ConvertTo-Plain $e)) }
+    return ,$l
+  }
+  return $v
 }
 
 function Find-OpencodeExe([string]$dir) {
@@ -257,20 +288,30 @@ Step "4/6 opencode config"
 $cfg = Get-UserVar "OPENCODE_CONFIG"
 if (-not $cfg) { $cfg = Join-Path $env:USERPROFILE ".config\opencode\opencode.json" }
 New-Item -ItemType Directory -Force (Split-Path $cfg) | Out-Null
-$perm = [ordered]@{ edit = "ask"; bash = "ask" }
+
+# Start from the existing config (if it is plain JSON) and change only the keys this installer manages.
+# Everything else (theme, keybinds, other providers, ...) is kept as it is.
 $oldRaw = $null
+$old = $null
 if (Test-Path $cfg) {
   $oldRaw = [IO.File]::ReadAllText($cfg)
-  try {
-    $old = $oldRaw | ConvertFrom-Json
-    if ($null -ne $old.permission) { $perm = $old.permission }
-  } catch { Info "old config is not plain JSON (comments?) - using permission edit/bash = ask" }
+  if ($oldRaw.Trim()) {
+    try { $parsed = $oldRaw | ConvertFrom-Json; if ($parsed -is [pscustomobject]) { $old = ConvertTo-Plain $parsed } } catch {}
+    if ($null -eq $old) { Info "old config is not plain JSON (comments?) - writing a fresh config; the old file is backed up" }
+  }
 }
-$lim = [ordered]@{ context = 65536; output = 16384 }
+if ($null -eq $old) { $old = [ordered]@{} }
+$managed = @('$schema', 'enabled_providers', 'provider', 'model', 'share', 'permission')
+
+# the model list comes from the server; context/names come from the table above
 $models = [ordered]@{}
 foreach ($id in $ids) {
-  $name = $id; if ($Known.ContainsKey($id)) { $name = $Known[$id] }
-  $m = [ordered]@{ name = $name; limit = $lim }
+  $name = $id; $ctx = $DefaultContext
+  if ($Known.ContainsKey($id)) {
+    $name = $Known[$id].name
+    if ($Known[$id].ContainsKey("context")) { $ctx = $Known[$id].context }
+  }
+  $m = [ordered]@{ name = $name; limit = [ordered]@{ context = $ctx; output = 16384 } }
   if ($id -eq "mg") {   # Muse Glimmer: thinking strength is chosen per request (variant)
     $m["options"]  = [ordered]@{ chat_template_kwargs = [ordered]@{ reasoning_strength = "low" } }
     $m["variants"] = [ordered]@{
@@ -280,26 +321,50 @@ foreach ($id in $ids) {
   }
   $models[$id] = $m
 }
-$default = "halo/" + $ids[0]; if ($ids -contains "cn") { $default = "halo/cn" }
-$conf = [ordered]@{
-  '$schema'         = "https://opencode.ai/config.json"
-  enabled_providers = @("halo")
-  provider          = [ordered]@{
-    halo = [ordered]@{
-      npm     = "@ai-sdk/openai-compatible"
-      name    = "Strix Halo LLM"
-      options = [ordered]@{ baseURL = "$url/v1"; apiKey = '{env:LLM_KEY}' }
-      models  = $models
-    }
-  }
-  model      = $default
-  share      = "disabled"
-  permission = $perm
+$halo = [ordered]@{
+  npm     = "@ai-sdk/openai-compatible"
+  name    = "Strix Halo LLM"
+  options = [ordered]@{ baseURL = "$url/v1"; apiKey = '{env:LLM_KEY}' }
+  models  = $models
 }
+
+# provider: replace provider.halo entirely, keep the other provider entries
+$prov = [ordered]@{}
+if ($old.Contains("provider") -and $old["provider"] -is [System.Collections.IDictionary]) {
+  foreach ($k in $old["provider"].Keys) { $prov[$k] = $old["provider"][$k] }
+}
+$prov["halo"] = $halo
+
+# permission: keep the existing one, else ask before edits and commands
+$perm = [ordered]@{ edit = "ask"; bash = "ask" }
+if ($old.Contains("permission") -and $null -ne $old["permission"]) { $perm = $old["permission"] }
+
+# default model: keep it only if it is a halo model that exists on this server. With enabled_providers = halo
+# any other default cannot be used (opencode stops with an error), so it is replaced too.
+$default = "halo/" + $ids[0]; if ($ids -contains "cn") { $default = "halo/cn" }
+$model = $default
+$cur = $null; if ($old.Contains("model")) { $cur = $old["model"] }
+if ($cur -is [string] -and $cur.StartsWith("halo/") -and ($ids -contains $cur.Substring(5))) { $model = $cur }
+elseif ($cur) { Info "default model $cur is not available (only halo models are enabled) - using $default" }
+
+$conf = [ordered]@{}
+$conf['$schema'] = "https://opencode.ai/config.json"
+foreach ($k in $old.Keys) { if ($managed -notcontains $k) { $conf[$k] = $old[$k] } }
+$conf["enabled_providers"] = @("halo")
+$conf["provider"]          = $prov
+$conf["model"]             = $model
+$conf["share"]             = "disabled"
+$conf["permission"]        = $perm
+
 $json = $conf | ConvertTo-Json -Depth 30
 $chk = $json | ConvertFrom-Json     # re-parse before writing: never leave a broken config behind
 if (@($chk.provider.halo.models.PSObject.Properties).Count -ne $ids.Count) { throw "config check failed (model count)" }
 if ($chk.provider.halo.options.apiKey -ne '{env:LLM_KEY}') { throw "config check failed (apiKey)" }
+if (@($chk.enabled_providers).Count -ne 1 -or @($chk.enabled_providers)[0] -ne "halo") { throw "config check failed (enabled_providers)" }
+$have = @($chk.PSObject.Properties.Name)
+foreach ($k in $old.Keys) { if ($managed -notcontains $k -and $have -notcontains $k) { throw "config check failed (lost key $k)" } }
+if (@($chk.provider.PSObject.Properties).Count -ne $prov.Count) { throw "config check failed (providers)" }
+
 if ($null -ne $oldRaw -and $oldRaw.Trim() -ne $json.Trim()) {
   $bak = $cfg + ".bak-" + (Get-Date -Format "yyyyMMdd-HHmmss")
   Copy-Item $cfg $bak
@@ -308,8 +373,11 @@ if ($null -ne $oldRaw -and $oldRaw.Trim() -ne $json.Trim()) {
 [IO.File]::WriteAllText($cfg, $json, (New-Object Text.UTF8Encoding($false)))
 Set-EnvVar "OPENCODE_CONFIG" $cfg
 Ok "wrote $cfg  (provider halo, $($ids.Count) models, external providers off, share off)"
+$kept = @(); foreach ($k in $old.Keys) { if ($managed -notcontains $k) { $kept += $k } }
+foreach ($k in $prov.Keys) { if ($k -ne "halo") { $kept += "provider.$k" } }
+if ($kept.Count -gt 0) { Info ("kept your other settings: " + ($kept -join ", ")) }
 Info ("permission: " + ($perm | ConvertTo-Json -Depth 10 -Compress))
-Info "default model: $default"
+Info "default model: $model"
 
 # ---------------------------------------------------------------- 5/6 work folder + launcher
 Step "5/6 Work folder and desktop launcher"

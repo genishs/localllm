@@ -319,6 +319,13 @@ foreach ($id in $ids) {
       xhigh = [ordered]@{ chat_template_kwargs = [ordered]@{ reasoning_strength = "xhigh" } }
     }
   }
+  if ($id -eq "bolt") {   # Nemotron Bolt: thinking is off on the server; a variant turns it on per request
+    $m["options"]  = [ordered]@{ chat_template_kwargs = [ordered]@{ enable_thinking = $false } }
+    $m["variants"] = [ordered]@{
+      fast  = [ordered]@{ chat_template_kwargs = [ordered]@{ enable_thinking = $false } }
+      think = [ordered]@{ chat_template_kwargs = [ordered]@{ enable_thinking = $true } }
+    }
+  }
   $models[$id] = $m
 }
 $halo = [ordered]@{
@@ -415,6 +422,7 @@ Write-Host ("   models  : " + (($ids | ForEach-Object { "halo/$_" }) -join "  ")
 Write-Host "   start   : opencode -m halo/$pick          auto-approve: opencode --auto -m halo/$pick"
 Write-Host "   in a session: /models to switch (the first reply after a switch waits 20-80 s while the server swaps models)"
 if ($ids -contains "mg") { Write-Host "   Glimmer (mg) thinking: Ctrl+T or Ctrl+P -> 'Switch model variant' -> low / xhigh" }
+if ($ids -contains "bolt") { Write-Host "   Bolt (bolt) thinking: Ctrl+T or Ctrl+P -> 'Switch model variant' -> fast (off, default) / think (on)" }
 Write-Host "   launcher: double-click opencode-local.bat on the desktop (extra arguments work: opencode-local.bat --auto -m halo/$pick)"
 Write-Host "   server  : $url   (API key is stored in user env LLM_KEY and is not shown)"
 Write-Host "   new terminals have opencode on PATH; this window already does."

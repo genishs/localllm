@@ -14,7 +14,7 @@ llama.cpp 의 `llama-server` **router 모드** 하나가 포트 8080 에서 모�
 ## 1. 처음 세우는 순서
 
 1. [hardware.md](hardware.md)의 OS 설정: `render`/`video` 그룹, `ttm.pages_limit`, (노트북이면) 덮개 설정.
-2. llama.cpp 공식 사전빌드(Vulkan)를 **ext4** 에 푼다. 지금 쓰는 빌드는 **b11701**(2026-10-16)이다 - `bolt` 와 `mcv` 가 b11701 이상을 요구한다(이전 b11539 는 못 읽는다). NTFS 에 두면 `.so` 심볼릭 링크가 깨진다([troubleshooting.md](troubleshooting.md#ntfs-에-둔-빌드가-안-뜬다)).
+2. llama.cpp 공식 사전빌드(Vulkan)를 **ext4** 에 푼다. 지금 쓰는 빌드는 **b11701**(2026-10-16)이다 - `bolt` 와 `mcv` 가 b11701 이상을 요구한다(이전 b11539 에는 해당 PR 이 없다). NTFS 에 두면 `.so` 심볼릭 링크가 깨진다([troubleshooting.md](troubleshooting.md#ntfs-에-둔-빌드가-안-뜬다)).
    ```bash
    mkdir -p ~/llama.cpp-bin/b11701 && cd ~/llama.cpp-bin/b11701
    curl -LO https://github.com/ggml-org/llama.cpp/releases/download/b11701/llama-b11701-bin-ubuntu-vulkan-x64.tar.gz

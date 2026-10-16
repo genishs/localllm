@@ -8,7 +8,7 @@
 - 파일 크기 GB 는 10^9 바이트. sha256 은 앞 16자리(전체 값과 받는 주소는 [`server/models.tsv`](../server/models.tsv)).
 - 「표준 시험」은 2026-10-17 같은 하네스로 router 에 있던 모델을 GPU 에서 한 번에 하나씩 돌린 값이다(방법: [benchmarks.md](benchmarks.md#1-표준-시험-2026-10-17)).
 - 공개일은 제작사의 첫 Hugging Face 저장소 생성일 기준이다(실제 발표일과 며칠 다를 수 있다). 변환 GGUF 저장소의 날짜는 따로 적는다.
-- 엔진은 llama.cpp **b11701**. `bolt` 와 `mcv` 는 b11701 이상이 필요하다(b11539 는 못 읽는다). 표준 시험 값은 `bolt` 만 b11701, 나머지는 b11539 에서 잰 것이다 - b11701 에서 전체를 다시 재는 중이다.
+- 엔진은 llama.cpp **b11701**. `bolt` 와 `mcv` 는 b11701 이상이 필요하다(해당 PR 이 b11539 보다 나중에 병합됐다). 표준 시험 값은 `bolt` 만 b11701, 나머지는 b11539 에서 잰 것이다 - b11701 에서 전체를 다시 재는 중이다.
 
 ## 한눈에 보기
 
@@ -275,7 +275,7 @@ router 에 올려 두었지만 일상 사용은 권하지 않는 모델. 비교 
 | 구조 | 시리즈 첫 MoE, 전체 35B 중 활성 3B, 이미지·영상 이해 특화 |
 | 양자화 · 크기 · sha256 | Q6_K · 28.5GB (28,513,556,640 B) · `fcbe98ad681730bc` + mmproj f16 1.1GB · `bff3b688e14c300e` + DSpark 초안 Q8_0 0.42GB · `9d23bebd6079cace` |
 | 출처 | https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B-gguf · 초안 https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B-DSpark-gguf |
-| 엔진 | **llama.cpp b11701 이상 필요** (PR #29416, 2026-10-10 병합) - b11539 는 못 읽는다 |
+| 엔진 | **llama.cpp b11701 이상 필요** (PR #29416, 2026-10-10 병합) - 2026-10-09 빌드인 b11539 에는 이 PR 이 없다 |
 | router 설정 | `spec-type = draft-dspark` · 생각 끔(카드의 instruct 모드) · `temp = 0.7`, `top-p = 0.95`, `top-k = 100`, `min-p = 0` |
 | 표준 시험 / 실전 | 실측 전 |
 

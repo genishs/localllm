@@ -6,7 +6,7 @@
 
 - 별칭(alias) = router 에서 요청의 `model` 값 = opencode 에서 `halo/<별칭>`.
 - 파일 크기 GB 는 10^9 바이트. sha256 은 앞 16자리(전체 값과 받는 주소는 [`server/models.tsv`](../server/models.tsv)).
-- 「표준 시험」은 2026-10-17 같은 하네스로 모든 모델을 GPU 에서 한 번에 하나씩 돌린 값이다(방법: [benchmarks.md](benchmarks.md#1-표준-시험-2026-10-17)).
+- 「표준 시험」은 2026-10-17 같은 하네스로 당시 router 에 있던 모델을 GPU 에서 한 번에 하나씩 돌린 값이다(방법: [benchmarks.md](benchmarks.md#1-표준-시험-2026-10-17)).
 
 ## 한눈에 보기
 

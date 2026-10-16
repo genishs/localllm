@@ -4,7 +4,7 @@
 AMD Strix Halo 리눅스 서버에서 llama.cpp 를 router 모드로 돌리고, Windows PC 에서 [opencode](https://github.com/anomalyco/opencode) 코딩 에이전트로 접속한다.
 
 - 서버 설정(`server/`), Windows 설치 스크립트(`client/windows/`), 모델 카탈로그·벤치마크·운영·문제 해결 문서(`docs/`)로 이루어져 있다.
-- 모든 수치는 직접 잰 값이다. 실전 과제는 모델당 1회(n=1)라 경향으로만 읽는다.
+- 수치는 직접 잰 값이다(모델 카드의 주장은 따로 표시). 실전 과제는 모델당 1회(n=1)라 경향으로만 읽는다.
 - 라이선스 미지정(추후 결정). 사용하는 제3자 소프트웨어와 모델의 라이선스는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## 구성

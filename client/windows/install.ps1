@@ -149,7 +149,7 @@ try {
 # ---------------------------------------------------------------- 1/6 server address
 Step "1/6 Server address"
 Info "Enter the address (IP) of your Strix Halo LLM server."
-Info "On the server run  ./llm-router.sh status  (or  hostname -I )  to see it, e.g. 192.168.0.10"
+Info "On the server run  ~/llm-router.sh status  (or  hostname -I )  to see it, e.g. 192.168.0.10"
 $saved = ConvertTo-ServerUrl (Get-UserVar "LLM_URL")
 $url = $null
 for ($i = 1; $i -le 10 -and -not $url; $i++) {
@@ -176,7 +176,7 @@ if (-not (Test-Tcp $uri.Host $uri.Port 3000)) {
   else { Info "(could not work out this PC's address - the name $($uri.Host) may not resolve; check the spelling or use the IP)" }
   Info "If the server firewall is blocking it, run this ON THE SERVER:"
   Info "    ~/llm-allow.sh $shown"
-  Info "Also check: the server is on (./llm-router.sh status), same network, and the address above is right."
+  Info "Also check: the server is on (~/llm-router.sh status), same network, and the address above is right."
   Info "Then run this installer again (your answers are remembered)."
   return
 }
@@ -201,7 +201,7 @@ for ($attempt = 1; $attempt -le 3; $attempt++) {
   }
   if ($r.Status -gt 0) { Bad "The server answered HTTP $($r.Status). Is $url the LLM server?"; return }
   Bad "No answer from $url ($($r.Message))"
-  Info "The port is open but the server did not answer. Check ./llm-router.sh status on the server."
+  Info "The port is open but the server did not answer. Check ~/llm-router.sh status on the server."
   return
 }
 if ($null -eq $ids) { Bad "No valid API key after 3 tries. Ask the server owner for the key and run the installer again."; return }
@@ -352,7 +352,7 @@ Write-Host "   server  : $url   (API key is stored in user env LLM_KEY and is no
 Write-Host "   new terminals have opencode on PATH; this window already does."
 Write-Host ""
 if (Ask-YesNo "Start opencode now?" $true) {
-  Set-Location $work
+  Set-Location -LiteralPath $work
   & $exe.FullName
 }
 

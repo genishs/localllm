@@ -73,9 +73,9 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 | `orn` | Ornith-1.5-35B-A3B (Q6_K, MTP) | 29.2GB | 87.3 | 팀 작업을 성실히 돌리나 갤러그에서 좌우 이동 불가. 표본 1회라 판단 보류 |
 | `fn` | Qwen3.8-Flash-Next Coder 가지치기 (IQ1_M) | 58.4GB | 23.1 | 표준 시험 실패(`Array(n).map` 빈 배열 버그 재현). 실험용 |
 | `mel` | Mellum2.1-12B-A2.5B Thinking (Q8_0) | 12.9GB | 84.7 | 읽기 2008 t/s · GTT 13G 로 가볍고 표준 시험 통과. 생각이 항상 켜짐. 실전 과제 미실시 |
-| `bolt` | NVIDIA Nemotron 3.5 Bolt 74B-A9B (2비트 QAT) | 22.0GB | - | **추가 중 - 실측 전** |
-| `lfm` | LFM2.5-24B-A2B (Q8_0) | 25.5GB | - | **추가 중 - 실측 전** |
-| `mcv` | MiniCPM-V 4.7 35B-A3B (Q6_K, 비전) | 28.5GB | - | **추가 중 - 실측 전** |
+| `bolt` | NVIDIA Nemotron 3.5 Bolt 74B-A9B (2비트 QAT) | 22.0GB | - | **추가 중 — 실측 전** |
+| `lfm` | LFM2.5-24B-A2B (Q8_0) | 25.5GB | - | **추가 중 — 실측 전** |
+| `mcv` | MiniCPM-V 4.7 35B-A3B (Q6_K, 비전) | 28.5GB | - | **추가 중 — 실측 전** |
 
 함수 벤치(테트리스 함수 6문제)는 거의 모두 6/6 이라 모델 차이가 보이지 않았다 - 차이는 끝까지 만든 결과물을 사람이 돌려 볼 때 드러났다.
 전체 제원·sha256·router 설정은 [docs/models.md](docs/models.md), 시험 방법과 결과는 [docs/benchmarks.md](docs/benchmarks.md).

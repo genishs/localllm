@@ -18,9 +18,9 @@
 | `orn` | Ornith-1.5-35B-A3B | MoE 3B 활성, 추론 모델 | Q6_K · 29.2GB | MTP | 87.3 | 968 | 30.0G | 사용 중 |
 | `fn` | Qwen3.8-Flash-Next Coder (가지치기) | MoE, 전문가 절반 제거 | IQ1_M · 58.4GB (2조각) | 없음 | 23.1 | 356 | 30.2G | 사용 중 (실험용) |
 | `mel` | Mellum2.1-12B-A2.5B Thinking | MoE 2.5B 활성, 생각 모델 | Q8_0 · 12.9GB | 없음 | 84.7 | 2008 | 13.3G | 사용 중 (실전 과제 미실시) |
-| `bolt` | Nemotron 3.5 Bolt 74B-A9B | 혼합 LatentMoE 9B 활성 | 2비트 QAT · 22.0GB (+mmproj, 초안) | DFlash | - | - | - | **추가 중 - 실측 전** |
-| `lfm` | LFM2.5-24B-A2B | 하이브리드 MoE 2B 활성 | Q8_0 · 25.5GB | 없음 | - | - | - | **추가 중 - 실측 전** |
-| `mcv` | MiniCPM-V 4.7 35B-A3B | MoE 3B 활성, 비전 특화 | Q6_K · 28.5GB (+mmproj, 초안) | DSpark | - | - | - | **추가 중 - 실측 전** |
+| `bolt` | Nemotron 3.5 Bolt 74B-A9B | 혼합 LatentMoE 9B 활성 | 2비트 QAT · 22.0GB (+mmproj, 초안) | DFlash | - | - | - | **추가 중 — 실측 전** |
+| `lfm` | LFM2.5-24B-A2B | 하이브리드 MoE 2B 활성 | Q8_0 · 25.5GB | 없음 | - | - | - | **추가 중 — 실측 전** |
+| `mcv` | MiniCPM-V 4.7 35B-A3B | MoE 3B 활성, 비전 특화 | Q6_K · 28.5GB (+mmproj, 초안) | DSpark | - | - | - | **추가 중 — 실측 전** |
 
 \* 표준 시험(2026-10-17) 값. 생성 = 답을 쓰는 속도, 읽기 = 긴 프롬프트(약 9.8천 토큰)를 읽는 속도, GTT = 올라간 모델이 쓰는 GPU 공유 메모리.
 mg 는 생각 강도 low. 작업 중 평균은 이보다 낮을 수 있다(아래 각 모델의 「과거 실측」).
@@ -124,7 +124,7 @@ mg 는 생각 강도 low. 작업 중 평균은 이보다 낮을 수 있다(아�
 
 ---
 
-## 추가 중 - 실측 전
+## 추가 중 — 실측 전
 
 아래 셋은 모델 파일을 받는 중이다. 파일·설정은 [`server/llm-presets.ini`](../server/llm-presets.ini)에 이미 들어 있지만 **속도·메모리·품질은 아직 재지 않았다**(표의 「-」). sha256 은 Hugging Face 가 공개한 값이며, 받은 뒤 `sha256sum` 으로 대조해야 한다.
 

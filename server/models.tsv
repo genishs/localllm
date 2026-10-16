@@ -1,0 +1,16 @@
+alias	part	status	repo	file	size_bytes	sha256	dir
+cn	main	current	bartowski/Qwen_Qwen3-Coder-Next-GGUF	Qwen_Qwen3-Coder-Next-Q4_K_M.gguf	48727680704	78f38fe85daaab51f0e1e5abd19c8721a4980ce49774d8c3d8569c1b8e5de1e4	.
+q36	main	current	unsloth/Qwen3.6-35B-A3B-MTP-GGUF	Qwen3.6-35B-A3B-UD-Q6_K.gguf	30011242784	49935b04ad883c2f3d4da61f65b609d447dad67d0b08453b90abb09a1bb35464	qwen36-35b
+mg	main	current	meta-models/Muse-Glimmer-30B-GGUF	Muse-Glimmer-30B-KQuant-Dynamic-Q4_K_XL.gguf	19653960832	ac7023d6a4c704eb9af54ab53e476a66b7f5b6c0ef2fc4a8dde5253c291a6c38	glimmer
+mg	draft	current	meta-models/Muse-Glimmer-30B-GGUF	dflash-Muse-Glimmer-30B-Q4_K_M.gguf	1631208128	b2e808bf656086fe86bd0d0bd990f01d33e377537a07c02d45371517c8b264ef	glimmer
+orn	main	current	ornith-ai/Ornith-1.5-35B-A3B-GGUF	Ornith-1.5-35B-Q6_K.gguf	29208731392	15d4658bbfc9c6034621729c15bbb50662c82b32a7ddd9624a1e545a74bdbb4b	ornith
+fn	main-1of2	current	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-Coder-GGUF	IQ1_M/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00001-of-00002.gguf	29608446496	e11083ba855e7666b48ea3f2db6a9c3a20c18751a012cc24f948de91b7087fad	flashnext
+fn	main-2of2	current	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-Coder-GGUF	IQ1_M/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00002-of-00002.gguf	28800138432	316b46f3a2dbd68c900f43136ab9449f9dcc3725dfd8c794847c204bc161e113	flashnext
+mel	main	current	JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF	Mellum2.1-12B-A2.5B-Thinking-Q8_0.gguf	12925417760	69e0ac02a16586c2c9e991f1e3b8a1eb403882e7ab9e69ea01eb23dbbbc6841f	mellum21
+bolt	main	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	22018326528	91d63363e782c8a3d5f4be42816eba8e0d42dd2530bd07a7d0d2dc440599af75	nemotron-bolt
+bolt	mmproj	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	mmproj-NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	1733692736	0ee891eadc7bf0cae6289b249c74eb1ef420534351f6ef8b64d49f0ca6a926b0	nemotron-bolt
+bolt	draft	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr.gguf	998242560	080e1ea41c9562a7804dbf30c6fbd4d17e216c6b8ff666f88e6edb1816010194	nemotron-bolt
+lfm	main	staging	LiquidAI/LFM2.5-24B-A2B-GGUF	LFM2.5-24B-A2B-Q8_0.gguf	25493732640	f09bf094a8a138c5b645598ca1abb6696a0fde26662d7af649b0713fdef330b6	lfm25
+mcv	main	staging	openbmb/MiniCPM-V-4.7-35B-A3B-gguf	MiniCPM-V-4_7-35B-A3B-Q6_K.gguf	28513556640	fcbe98ad681730bc66828591c34761c2c266d54d4ffe7c0ae35e54e3ee7b4343	minicpm-v47
+mcv	mmproj	staging	openbmb/MiniCPM-V-4.7-35B-A3B-gguf	mmproj-model-f16.gguf	1119575840	bff3b688e14c300eca273092c37c50a0ddfcc2054e079af1a0480edeed5d20f1	minicpm-v47
+mcv	draft	staging	openbmb/MiniCPM-V-4.7-35B-A3B-DSpark-gguf	dspark-MiniCPM-V-4_7-35B-A3B-Q8_0.gguf	424572928	9d23bebd6079cace8bb059411c13d9c2b42680b221e87febb842c05b39660e6c	minicpm-v47

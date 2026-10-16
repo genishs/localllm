@@ -7,20 +7,22 @@ llama.cpp 의 `llama-server` **router 모드** 하나가 포트 8080 에서 모�
 |---|---|
 | [`server/llm-router.sh`](../server/llm-router.sh) | router 서버 시작/중지/상태 |
 | [`server/llm-presets.ini`](../server/llm-presets.ini) | 모델 목록과 모델별 옵션 |
-| [`server/models.tsv`](../server/models.tsv) | 모델 파일의 출처·크기·sha256 (다시 받을 때 사용) |
+| [`server/models.tsv`](../server/models.tsv) | 모델 파일의 출처·크기·sha256 (다시 받을 때 사용). `status`: `current` 사용 중 / `compare` 비교용 / `staging` 추가 중 / `local-convert` 직접 변환한 파일(내려받는 파일이 아님) |
 | [`server/llm-allow.sh`](../server/llm-allow.sh) | 방화벽에서 PC 한 대(IP)만 8080 에 열기 |
 | [`server/lid-ac-ignore.sh`](../server/lid-ac-ignore.sh) | 전원이 꽂힌 노트북은 덮개를 닫아도 절전하지 않게 |
 
 ## 1. 처음 세우는 순서
 
 1. [hardware.md](hardware.md)의 OS 설정: `render`/`video` 그룹, `ttm.pages_limit`, (노트북이면) 덮개 설정.
-2. llama.cpp 공식 사전빌드(Vulkan)를 **ext4** 에 푼다. NTFS 에 두면 `.so` 심볼릭 링크가 깨진다([troubleshooting.md](troubleshooting.md#ntfs-에-둔-빌드가-안-뜬다)).
+2. llama.cpp 공식 사전빌드(Vulkan)를 **ext4** 에 푼다. 지금 쓰는 빌드는 **b11701**(2026-10-16)이다 - `bolt` 와 `mcv` 가 b11701 이상을 요구한다(이전 b11539 는 못 읽는다). NTFS 에 두면 `.so` 심볼릭 링크가 깨진다([troubleshooting.md](troubleshooting.md#ntfs-에-둔-빌드가-안-뜬다)).
    ```bash
-   mkdir -p ~/llama.cpp-bin/b11539 && cd ~/llama.cpp-bin/b11539
-   curl -LO https://github.com/ggml-org/llama.cpp/releases/download/b11539/llama-b11539-bin-ubuntu-vulkan-x64.tar.gz
-   tar -xzf llama-b11539-bin-ubuntu-vulkan-x64.tar.gz      # -> llama-b11539/llama-server
+   mkdir -p ~/llama.cpp-bin/b11701 && cd ~/llama.cpp-bin/b11701
+   curl -LO https://github.com/ggml-org/llama.cpp/releases/download/b11701/llama-b11701-bin-ubuntu-vulkan-x64.tar.gz
+   echo "1b0e8ddc82545fe9a5ce90b4c46d8651a0ab82390c48330a8b6c8b4ed76ddd00  llama-b11701-bin-ubuntu-vulkan-x64.tar.gz" | sha256sum -c -
+   tar -xzf llama-b11701-bin-ubuntu-vulkan-x64.tar.gz      # -> llama-b11701/llama-server
+   ./llama-b11701/llama-server --version                   # version: 0.7.0-dev (build 11701, commit 01fc3aae8)
    ```
-3. 모델을 받아 sha256 을 대조한다(아래 [새 모델 추가](#새-모델-추가-체크리스트) 2번).
+3. 모델을 받아 sha256 을 대조한다(아래 [새 모델 추가](#새-모델-추가-체크리스트) 3번).
 4. `server/` 의 파일을 서버 홈에 복사하고 `llm-presets.ini` 의 모델 경로를 자기 것으로 고친다.
    ```bash
    cp server/llm-router.sh server/llm-allow.sh server/lid-ac-ignore.sh ~/ && cp server/llm-presets.ini ~/
@@ -88,38 +90,41 @@ chat-template-kwargs = {"enable_thinking":false}
 - `[*]` 는 공통값이고 **모델 섹션이 같은 키를 쓰면 덮어쓴다**(예: `fn` 은 `load-mode = mmap`).
 - 주석은 줄 맨 앞에 `;` 를 둔 한 줄 주석만 쓴다. 이 레포의 파일은 전부 그렇다 - 값 뒤에 붙이는 주석은 시험하지 않았다.
 - `load-on-startup = true` 는 router 전용 키다. 한 모델에만 둔다.
-- 자주 쓰는 키: `model` `model-draft`(초안 모델) `mmproj`(비전) `spec-type`(`draft-mtp` `draft-dflash` `draft-dspark` ...) `spec-draft-n-max` `spec-draft-ngl` `chat-template-kwargs` `temp` `top-p` `top-k` `min-p` `presence-penalty` `repeat-penalty` `cache-type-k`/`cache-type-v` `override-tensor` `load-mode`.
-- 옵션 이름은 llama.cpp 버전마다 바뀐다. 이 빌드(b11539)에서는 옛 `--no-mmap` 이 `--load-mode none` 이 되었다(옛 이름은 invalid argument). 확인은 `llama-server --help | grep -n <이름>`.
+- 자주 쓰는 키: `model` `model-draft`(초안 모델) `mmproj`(비전) `lora`(LoRA 어댑터 GGUF) `spec-type`(`draft-mtp` `draft-dflash` `draft-dspark` ...) `spec-draft-n-max` `spec-draft-ngl` `chat-template-kwargs` `temp` `top-p` `top-k` `min-p` `presence-penalty` `repeat-penalty` `cache-type-k`/`cache-type-v` `override-tensor` `load-mode` `c`(문맥 크기).
+- 모델마다 문맥이 다르면 그 섹션에 `c = 32768` 처럼 쓴다(`c7` `c7r` `c1`). 클라이언트의 `limit.context` 도 같게 맞춰야 한다 - 설치 스크립트는 이 별칭들을 알고 있다([troubleshooting.md](troubleshooting.md#문맥이-32k-인-모델에서-문맥-초과-오류가-난다)).
+- LoRA 를 붙이려면 베이스 `model` 은 그대로 두고 `lora = /경로/어댑터.gguf` 한 줄을 더한다(`c7r` 예시. 이 레포에는 어댑터 파일이 없다 - 자기 어댑터로 바꿔 쓴다). 적용 여부는 자식 서버의 `GET /lora-adapters` 가 scale 1.0 으로 보여 준다.
+- 옵션 이름은 llama.cpp 버전마다 바뀐다. 이 빌드(b11701, b11539 도 같다)에서는 옛 `--no-mmap` 이 `--load-mode none` 이 되었다(옛 이름은 invalid argument). 이 문서의 옵션(`--load-mode` `--override-tensor` `--lora` `--mmproj` `--spec-type` `--api-key-file` ...)이 b11701 의 `--help` 에 모두 있는 것을 확인했다. 확인은 `llama-server --help | grep -n <이름>`.
 - 모델 머리 주석은 한 형식을 지킨다(모델 / 출처(공개일·라이선스) / 양자화·크기·sha256 / 가속·비고 / 실측).
 - 이 레포의 `llm-presets.ini` 의 `model` 경로는 이 서버의 실제 경로다. 다른 장비에서는 자기 경로로 바꾼다.
 
 ## 새 모델 추가 체크리스트
 
-1. **들어가는지 확인**: 파일 크기 + 문맥(KV)이 GTT(56GiB)를 넘지 않아야 한다. 참고로 가장 큰 `cn`(파일 48.7GB)이 GTT 47.5G 를 쓴다. 활성 파라미터가 큰 dense 모델은 대역폭 때문에 느리다([hardware.md](hardware.md)).
-2. **받고 sha256 으로 확인**: 크기만 맞으면 끝난 게 아니다(미리 크기를 잡는 다운로더가 있다).
+1. **엔진이 이 구조를 아는지 확인**: 새 구조의 모델은 새 llama.cpp 빌드가 있어야 읽힌다. 모델 카드의 지원 버전과 llama.cpp 의 커밋·PR 병합일을 본다. (`bolt` 는 PR #30520, 10-15 병합 -> b11701 이상. b11539 에서는 `check_tensor_dims: ... has wrong shape` 로 로드에 실패했다. [troubleshooting.md](troubleshooting.md#새-모델이-로드되지-않는다-llamacpp-빌드가-모델보다-오래됨))
+2. **들어가는지 확인**: 파일 크기 + 문맥(KV)이 GTT(56GiB)를 넘지 않아야 한다. 참고로 가장 큰 `cn`(파일 48.7GB)이 GTT 47.5G 를 쓴다. 활성 파라미터가 큰 dense 모델은 대역폭 때문에 느리다([hardware.md](hardware.md)).
+3. **받고 sha256 으로 확인**: 크기만 맞으면 끝난 게 아니다(미리 크기를 잡는 다운로더가 있다).
    ```bash
    # Hugging Face 가 공개한 sha256 (lfs.oid)
    curl -s "https://huggingface.co/api/models/<repo>/tree/main?recursive=true" \
      | python3 -c 'import json,sys;[print(e["lfs"]["oid"],e["size"],e["path"]) for e in json.load(sys.stdin) if "lfs" in e]'
    sha256sum <받은 파일>            # 위 값과 같아야 한다
    ```
-3. **MTP 층이 있는지 확인**(`spec-type = draft-mtp` 를 쓰려면): 헤더에 `nextn` 텐서가 있어야 한다.
+4. **MTP 층이 있는지 확인**(`spec-type = draft-mtp` 를 쓰려면): 헤더에 `nextn` 텐서가 있어야 한다.
    ```bash
    head -c 32M <파일.gguf> | grep -ac nextn     # 1 이상이면 있음 (MTP 포함 파일에서 확인한 방법)
    ```
    unsloth 의 일반 GGUF 저장소는 MTP 층을 뺀다. `...-MTP-GGUF` 저장소를 따로 받아야 한다.
-4. **프리셋 섹션 추가**: 위 머리 주석 형식을 지키고, 모델 카드의 권장 샘플링과 생각(thinking) 처리를 적는다. 생각을 끄는 모델은 `chat-template-kwargs = {"enable_thinking":false}`.
-5. **재시작**: `~/llm-router.sh start`. `status` 목록에 새 별칭이 `unloaded` 로 보여야 한다.
-6. **시험 요청** (서버에서):
+5. **프리셋 섹션 추가**: 위 머리 주석 형식을 지키고, 모델 카드의 권장 샘플링과 생각(thinking) 처리를 적는다. 생각을 끄는 모델은 `chat-template-kwargs = {"enable_thinking":false}`.
+6. **재시작**: `~/llm-router.sh start`. `status` 목록에 새 별칭이 `unloaded` 로 보여야 한다.
+7. **시험 요청** (서버에서):
    ```bash
    curl -s http://127.0.0.1:8080/v1/chat/completions \
      -H "Authorization: Bearer $(cat ~/.config/llm-api-key)" -H 'Content-Type: application/json' \
      -d '{"model":"<별칭>","messages":[{"role":"user","content":"hi"}],"max_tokens":32}'
    ```
    첫 응답은 모델을 올리는 시간이 포함된다. 끝난 뒤 **`status` 의 GTT 가 올라갔는지** 확인한다.
-7. **재기**: 생성/읽기 속도와 GTT, 초안 수락률을 로그에서 읽어 머리 주석의 「실측」에 적는다([로그](#로그)). 표준 시험과 같은 방법으로 재면 비교할 수 있다([benchmarks.md](benchmarks.md#1-표준-시험-2026-10-17)).
-8. **클라이언트**: Windows 에서 설치 스크립트를 다시 실행하면 `/v1/models` 목록에서 새 모델이 opencode 에 들어간다(이름 표는 `install.ps1` 의 `$Known`; 모르는 id 는 id 그대로 표시).
-9. **문서**: `server/models.tsv` 에 행을 추가하고 [models.md](models.md)·README 표를 갱신한다.
+8. **재기**: 생성/읽기 속도와 GTT, 초안 수락률을 로그에서 읽어 머리 주석의 「실측」에 적는다([로그](#로그)). 표준 시험과 같은 방법으로 재면 비교할 수 있다([benchmarks.md](benchmarks.md#1-표준-시험-2026-10-17)).
+9. **클라이언트**: Windows 에서 설치 스크립트를 다시 실행하면 `/v1/models` 목록에서 새 모델이 opencode 에 들어간다(이름 표는 `install.ps1` 의 `$Known`; 모르는 id 는 id 그대로 표시).
+10. **문서**: `server/models.tsv` 에 행을 추가하고 [models.md](models.md)·README 표를 갱신한다.
 
 ## 로그
 
@@ -142,7 +147,7 @@ chat-template-kwargs = {"enable_thinking":false}
 # GTT 47.5G / 56G
 ```
 
-- 올라간 모델의 GTT 가 대략 이 값이어야 한다: `cn` 47~48G · `q36`/`orn`/`fn` 약 30G · `mg` 약 22.5G · `mel` 약 13G.
+- 올라간 모델의 GTT 가 대략 이 값이어야 한다: `cn` 47~48G · `ff` 약 46.5G · `q36`/`orn`/`fn` 약 30G · `aw` 약 29G · `q38` 약 28G · `mg` 약 22.5G · `mel` 약 13G · `c7`/`c7r` 약 9.6G · `c1` 약 4.3G.
 - 모델이 `loaded` 인데 **GTT 가 0.0G** 이면 GPU 를 못 쓰는 것이다 -> [troubleshooting.md](troubleshooting.md#재부팅-후-gpu-를-못-쓰고-cpu-로-돈다).
 - 직접 읽기: `awk '{printf "%.1fG\n",$1/1073741824}' /sys/class/drm/card*/device/mem_info_gtt_used` (카드가 여럿이면 GPU 쪽 카드의 값을 본다).
 

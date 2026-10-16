@@ -11,12 +11,12 @@ AMD Strix Halo 리눅스 서버에서 llama.cpp 를 router 모드로 돌리고, 
 
 ```
 Windows PC                                   Strix Halo 서버
- opencode  --HTTP /v1 + API 키-->  :8080  llama-server (router 모드, llama.cpp b11539 / Vulkan)
+ opencode  --HTTP /v1 + API 키-->  :8080  llama-server (router 모드, llama.cpp b11701 / Vulkan)
  (provider "halo")                          └ 요청의 model 이름으로 모델 선택 (한 번에 1개, 교체 17~80초)
-                                              cn | q36 | mg | orn | fn | mel | (bolt | lfm | mcv 추가 중)
+                                              15종: cn q36 mg orn mel bolt / fn ff q38 aw c7 c7r c1 / (lfm mcv 추가 중)
 ```
 
-- **서버**: llama.cpp b11539(공식 사전빌드, Vulkan 백엔드)의 router 모드. AMD Strix Halo / Radeon 8060S, 64GB 통합 메모리 중 56GB 를 GPU 공유 메모리(GTT)로 쓴다. 포트 8080, API 키 인증, 모델은 한 번에 하나만 올리고 요청의 `model` 이름에 따라 자동 교체한다.
+- **서버**: llama.cpp b11701(공식 사전빌드, Vulkan 백엔드)의 router 모드. AMD Strix Halo / Radeon 8060S, 64GB 통합 메모리 중 56GB 를 GPU 공유 메모리(GTT)로 쓴다. 포트 8080, API 키 인증, 모델은 한 번에 하나만 올리고 요청의 `model` 이름에 따라 자동 교체한다.
 - **클라이언트**: Windows PC 의 opencode v1.18.35. OpenAI 호환 제공자 `halo`(표시 이름 「Strix Halo LLM」)로 서버에 붙는다.
 - 이 서버에서는 메모리 대역폭이 속도를 정한다 - 활성 파라미터가 작은 MoE 모델이 빠르고 dense 30B 는 느리다.
 
@@ -28,7 +28,7 @@ Windows PC                                   Strix Halo 서버
 | CPU / GPU | AMD Ryzen AI MAX+ 392 (12코어/24스레드) / 내장 Radeon 8060S (RDNA 3.5, gfx1151) |
 | 메모리 | 64GB LPDDR5X 통합 메모리 (OS 인식 60.94GiB), 전용 VRAM 0.5GiB, GPU 공유 메모리(GTT) 56GiB |
 | 저장장치 | NVMe 2TB (모델) + NVMe 1TB (OS) |
-| OS / 실행기 | Ubuntu 26.04.1 LTS (커널 7.0) / llama.cpp b11539, Vulkan (Mesa 26.0.8 RADV) |
+| OS / 실행기 | Ubuntu 26.04.1 LTS (커널 7.0) / llama.cpp b11701, Vulkan (Mesa 26.0.8 RADV) |
 | 클라이언트 | Windows 10/11 x64, PowerShell 5.1+, 서버와 같은 LAN 에서 TCP 8080 접속 가능 |
 
 자세한 내용과 서버를 따라 만들 때의 기준: [docs/hardware.md](docs/hardware.md).
@@ -50,7 +50,7 @@ irm https://raw.githubusercontent.com/genishs/localllm/main/client/windows/insta
 1. 서버 주소 입력(이전에 쓴 값이 기본값) -> 사용자 환경변수 `LLM_URL`.
 2. API 키 입력 -> `GET /v1/models` 로 확인(401 이면 최대 3번 다시 묻는다).
 3. opencode **v1.18.35** 설치 - GitHub 릴리스에서 받아 **sha256 검증**, 이 CPU 에서 안 돌면 baseline 빌드로 대체.
-4. 서버의 모델 목록으로 opencode 설정 작성 - 외부 제공자 차단(`enabled_providers: ["halo"]`), 공유 끔, 기존 `permission` 유지(없으면 수정·명령 모두 `ask`), 기존 설정은 `.bak-날짜` 로 백업.
+4. 서버의 모델 목록으로 opencode 설정을 쓴다. 기존 `opencode.json` 이 있으면 **관리하는 키만 바꾸고**(`$schema` · `provider.halo` · `enabled_providers` · `share` · `model` · `permission`) 나머지(theme, keybinds, 다른 제공자 등)는 그대로 둔다. 외부 제공자는 차단(`enabled_providers: ["halo"]`)하고 공유는 끈다. `permission` 은 기존 값을 유지(없으면 수정·명령 모두 `ask`), 기본 모델은 쓰던 `halo/...` 모델이 서버에 있으면 유지하고 아니면 `halo/cn`. 모델마다 문맥 크기가 다르면 맞춰 쓴다(32K 모델은 32768). 바꾸기 전 설정은 `.bak-날짜` 로 백업하고, 쓰기 전에 JSON 을 다시 읽어 검증한다.
 5. 작업 폴더 선택 + 바탕화면 실행 파일 `opencode-local.bat`.
 6. 사용법 안내, 바로 시작할지 묻기.
 
@@ -61,23 +61,32 @@ irm https://raw.githubusercontent.com/genishs/localllm/main/client/windows/insta
 powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
-## 모델 요약
+## 15개 모델
 
-표준 시험(2026-10-17, 같은 하네스 · GPU · 단독 실행) 기준. 생성 = 답을 쓰는 속도. 평가는 직접 플레이해 본 판정이며 n=1.
+서버(router)에서 고를 수 있는 모델 전부. 앞의 6종(`cn` `q36` `mg` `orn` `mel` `bolt`)이 일반 사용 후보, 다음 7종(`fn` `ff` `q38` `aw` `c7` `c7r` `c1`)은 실험·비교·기준선용, 마지막 2종(`lfm` `mcv`)은 추가 중이다.
 
-| 별칭 | 모델 | 크기 | 생성 t/s | 한 줄 평가 |
-|---|---|---|---|---|
-| `cn` | Qwen3-Coder-Next 80B-A3B (Q4_K_M) | 48.7GB | 55.4 | 가장 빨리 끝나는 초안형(테트리스 4분). 핵심 규칙을 틀릴 수 있고 짚어 주면 고친다. 서버 기본 상주 모델 |
-| `q36` | Qwen3.6-35B-A3B (UD-Q6_K, MTP) | 30.0GB | 89.7 | 빠른 기본 일꾼 후보. 테트리스 5/5, 큰 과제(갤러그)에서는 시작 직후 멈춤 |
-| `mg` | Muse Glimmer 30B (Q4_K_XL, DFlash) | 19.7GB | 25.3 | 느리지만 테트리스·갤러그 모두 완성도 1위. 시간이 걸려도 돌아가는 결과물이 필요할 때 |
-| `orn` | Ornith-1.5-35B-A3B (Q6_K, MTP) | 29.2GB | 87.3 | 팀 작업을 성실히 돌리나 갤러그에서 좌우 이동 불가. 표본 1회라 판단 보류 |
-| `fn` | Qwen3.8-Flash-Next Coder 가지치기 (IQ1_M) | 58.4GB | 23.1 | 표준 시험 실패(`Array(n).map` 빈 배열 버그 재현). 실험용 |
-| `mel` | Mellum2.1-12B-A2.5B Thinking (Q8_0) | 12.9GB | 84.7 | 읽기 2008 t/s · GTT 13G 로 가볍고 표준 시험 통과. 생각이 항상 켜짐. 실전 과제 미실시 |
-| `bolt` | NVIDIA Nemotron 3.5 Bolt 74B-A9B (2비트 QAT) | 22.0GB | - | **추가 중 — 실측 전** |
-| `lfm` | LFM2.5-24B-A2B (Q8_0) | 25.5GB | - | **추가 중 — 실측 전** |
-| `mcv` | MiniCPM-V 4.7 35B-A3B (Q6_K, 비전) | 28.5GB | - | **추가 중 — 실측 전** |
+| 약어 | 풀네임 | 발표처(공개) | 파라미터(전체·활성) | 필요 메모리(파일) | 실측 점유(GTT) | 특징 |
+|---|---|---|---|---|---|---|
+| `cn` | Qwen3-Coder-Next 80B-A3B (Q4_K_M) | Qwen (2026-01-30) | 80B · 3B | 48.7GB | 47.5G | 코딩 전용 MoE, 서버 기본 상주. 생성 55 t/s. 가장 빨리 끝나는 초안형이나 핵심 규칙을 틀릴 수 있다 |
+| `q36` | Qwen3.6-35B-A3B (UD-Q6_K, MTP) | Qwen (2026-04-15) | 35B · 3B | 30.0GB | 30.7G | 범용 MoE. 생성 90 t/s. 테트리스 5/5, 큰 과제(갤러그)에서는 시작 직후 멈춤 |
+| `mg` | Muse Glimmer 30B (Q4_K_XL, DFlash) | Meta (2026-08-09) | 30B · 30B (dense) | 19.7GB (+초안 1.6GB) | 22.7G | 에이전트용 dense. 생성 25 t/s 로 느리지만 테트리스·갤러그 완성도 1위. 생각 강도 low/xhigh |
+| `orn` | Ornith-1.5-35B-A3B (Q6_K, MTP) | ornith-ai (2026-08-18) | 35B · 3B | 29.2GB | 30.0G | 추론 모델(서버에서 생각 끔). 생성 87 t/s. 팀 작업을 성실히 돌리나 갤러그 조작 불가 - 판단 보류 |
+| `mel` | Mellum2.1-12B-A2.5B Thinking (Q8_0) | JetBrains (2026-09-20) | 12B · 2.5B | 12.9GB | 13.3G | 코딩 에이전트용 생각 모델(항상 켜짐). 읽기 2008 t/s, 가볍다. 실전 과제 미실시 |
+| `bolt` | NVIDIA Nemotron 3.5 Bolt 74B-A9B 24GB (2비트 QAT, DFlash) | NVIDIA (2026-10-07) | 74B · 9B | 22.0GB (+mmproj 1.7GB, 초안 1.0GB) | 28.8G | Mamba-2+Transformer LatentMoE, 도구 호출·터미널 학습, 이미지·영상 입력. 생성 46 t/s(생각 켠 측정, 끄면 62 t/s). **llama.cpp b11701 이상 필요**. variant fast/think. 실전 과제 미실시 |
+| `fn` | Qwen3.8-Flash-Next Coder 가지치기 (IQ1_M) | Qwen (2026-08-24) · ISTA-DASLab 압축 | 원본 125B · 6B (+51B n-gram 임베딩, 4B MTP) 중 전문가 절반 제거 | 58.4GB | 30.2G (+28.8GB mmap) | 1.89비트. 표준 시험 실패(`Array(n).map` 빈 배열 버그) - 실험용. 원본 라이선스 주의 |
+| `ff` | Qwen3.8-Flash-Next 전체판 (IQ3_XXS) | Qwen (2026-08-24) · ISTA-DASLab 압축 | 125B · 6B (+51B n-gram 임베딩, 4B MTP) | 75.8GB | 46.5G (+28.8GB mmap) | 표준 시험 통과(`fn` 은 실패). RAM 여유가 가장 빠듯하다(시험 중 최저 11.6G). 비교용. 원본 라이선스 주의 |
+| `q38` | Qwen3.8-27B (UD-Q6_K, MTP) | Qwen (2026-08-05) | 27B · 27B (dense) | 22.0GB | 27.7G | 생각 모델(서버에서 끔). 생성 24 t/s, 읽기 300 t/s 로 느리다. 비교용 |
+| `aw` | Qwen-AgentWorld-35B-A3B (UD-Q6_K) | Qwen (2026-06-22) | 35B · 3B | 29.3GB | 28.9G | **세계 모델 - 코딩 에이전트용 아님**. 비교용 |
+| `c7` | Qwen2.5-Coder-7B-Instruct (Q8_0) | Qwen (2024-09-17) | 7B · 7B (dense) | 8.1GB | 9.6G | 옛 세대 기준선, 직접 변환, 문맥 32K. 표준 시험 통과 |
+| `c7r` | c7 + React LoRA 「r4mlp」 | 직접 학습 (2026-06-27), 베이스는 Qwen | 7B · 7B + LoRA | 8.1GB (+어댑터 80MB) | 9.6G | 직접 학습한 LoRA 를 붙이는 예시 - 어댑터 파일은 비공개. 문맥 32K |
+| `c1` | Qwen2.5-Coder-1.5B-Instruct (F16) | Qwen (2024-09-18) | 1.5B · 1.5B (dense) | 3.1GB | 4.3G | 속도 기준선: 읽기 3045 t/s 로 가장 빠르나 표준 시험 실패. 직접 변환, 문맥 32K |
+| `lfm` | LFM2.5-24B-A2B (Q8_0) | Liquid AI (2026-10-09) | 24B · 2B | 25.5GB | **추가 중 — 실측 전** | 하이브리드 MoE, 에이전트 도구 사용 중심 학습. 파일 받는 중 |
+| `mcv` | MiniCPM-V 4.7 35B-A3B (Q6_K, 비전) | OpenBMB (2026-10-06) | 35B · 3B | 28.5GB (+mmproj 1.1GB, 초안 0.42GB) | **추가 중 — 실측 전** | 시리즈 첫 MoE, 이미지·영상 이해 특화. 파일 받는 중, **llama.cpp b11701 이상 필요** |
 
-함수 벤치(테트리스 함수 6문제)는 거의 모두 6/6 이라 모델 차이가 보이지 않았다 - 차이는 끝까지 만든 결과물을 사람이 돌려 볼 때 드러났다.
+- 공개일은 제작사의 첫 Hugging Face 저장소 생성일 기준이다. 생성 속도와 GTT 는 표준 시험(2026-10-17, 같은 하네스 · GPU · 단독 실행)의 값이고, 평가는 직접 플레이해 본 판정이며 n=1이다.
+- 서버 엔진을 b11539 에서 b11701 로 올렸다(`bolt` 와 `mcv` 가 필요로 한다). `bolt` 만 b11701 에서 잰 값이고 나머지는 b11539 값이다 - b11701 에서 전체를 다시 재는 중이다.
+- 함수 벤치(테트리스 함수 6문제)는 거의 모두 6/6 이라 모델 차이가 보이지 않았다 - 차이는 끝까지 만든 결과물을 사람이 돌려 볼 때 드러났다.
+
 전체 제원·sha256·router 설정은 [docs/models.md](docs/models.md), 시험 방법과 결과는 [docs/benchmarks.md](docs/benchmarks.md).
 
 ## opencode 에서 모델 고르기
@@ -91,6 +100,7 @@ opencode models halo              # 쓸 수 있는 모델 목록
 - 세션 안에서는 `/models` 로 바꾼다. 바뀐 모델은 **그 세션에서만** 유효하고, 다시 시작하면 `-m` > 설정 기본값 > 최근 사용 순으로 정해진다. 최근에 쓴 모델은 목록 맨 위 「Recent」 칸에 따로 나온다.
 - 모델을 바꾼 첫 응답은 서버가 모델을 교체하는 시간(대체로 17~30초, 큰 모델은 80초 안팎)이 더해진다.
 - **Glimmer(`mg`) 생각 강도**: 세션 안에서 `Ctrl+T` 또는 `Ctrl+P` -> 「Switch model variant」 -> `low` / `xhigh`. 모델을 다시 올리지 않는다.
+- **Bolt(`bolt`) 생각 켜기**: 같은 방법으로 `fast`(생각 끔, 기본) / `think`(켬). 생각을 켠 표준 시험은 추론이 약 1.25만 자 붙어 첫 응답이 103.5초(모델 교체 포함)였고, 생각을 끈 간이 확인은 62 t/s 에 작은 함수 하나가 1.2초였다.
 - 바탕화면 `opencode-local.bat` 는 작업 폴더에서 opencode 를 실행한다. 인자가 그대로 넘어간다: `opencode-local.bat --auto -m halo/q36`.
 
 ## 문서

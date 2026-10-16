@@ -10,7 +10,10 @@
 # 재부팅하면 자동으로 켜지지 않는다 - 부팅 후 start 를 다시 실행하고, 반드시 status 로 GTT 를 확인한다.
 set -uo pipefail
 
-BIN="${LLAMA_BIN:-$HOME/llama.cpp-bin/b11539/llama-b11539}"   # 공식 사전빌드(Vulkan). ext4 에 둘 것(NTFS 는 .so 링크가 깨진다)
+# llama.cpp 공식 사전빌드(Vulkan) - ext4 에 둘 것(NTFS 는 .so 링크가 깨진다).
+# 2026-10-17 b11539 -> b11701: Nemotron 3.5 Bolt(PR #30520)와 MiniCPM-V 4.7(PR #29416)을 읽으려면 b11701 이상이 필요하다.
+# 되돌리기: LLAMA_BIN=$HOME/llama.cpp-bin/b11539/llama-b11539 (bolt 와 mcv 는 못 쓴다)
+BIN="${LLAMA_BIN:-$HOME/llama.cpp-bin/b11701/llama-b11701}"
 PRESETS="${LLM_PRESETS:-$HOME/llm-presets.ini}"
 UNIT="${LLM_UNIT:-llm-server}"
 LOG="${LLM_LOG:-$HOME/gpu_jobs/logs/llm-server.log}"

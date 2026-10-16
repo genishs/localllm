@@ -13,9 +13,9 @@ ff	main-1of2	compare	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF	IQ3_XXS/Qwen3.8
 ff	main-2of2	compare	ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF	IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf	28800138432	316b46f3a2dbd68c900f43136ab9449f9dcc3725dfd8c794847c204bc161e113	flashnext-full
 c7	main	local-convert	Qwen/Qwen2.5-Coder-7B-Instruct	qwen2.5-coder-7b-q8_0.gguf	8098525760	c4b171ef14a7a498e73782085543818620a2f3c76143960a73d1882fa6334f65	.
 c1	main	local-convert	Qwen/Qwen2.5-Coder-1.5B-Instruct	qwen2.5-coder-1.5b-f16.gguf	3093669504	f1c4072853e42b29cec7eb3509f71bd129f0bb90f8d596868eb54d9ece84ba01	.
-bolt	main	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	22018326528	91d63363e782c8a3d5f4be42816eba8e0d42dd2530bd07a7d0d2dc440599af75	nemotron-bolt
-bolt	mmproj	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	mmproj-NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	1733692736	0ee891eadc7bf0cae6289b249c74eb1ef420534351f6ef8b64d49f0ca6a926b0	nemotron-bolt
-bolt	draft	staging	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr.gguf	998242560	080e1ea41c9562a7804dbf30c6fbd4d17e216c6b8ff666f88e6edb1816010194	nemotron-bolt
+bolt	main	current	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	22018326528	91d63363e782c8a3d5f4be42816eba8e0d42dd2530bd07a7d0d2dc440599af75	nemotron-bolt
+bolt	mmproj	current	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF	mmproj-NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB.gguf	1733692736	0ee891eadc7bf0cae6289b249c74eb1ef420534351f6ef8b64d49f0ca6a926b0	nemotron-bolt
+bolt	draft	current	nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr-GGUF	NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-LiLiCorr.gguf	998242560	080e1ea41c9562a7804dbf30c6fbd4d17e216c6b8ff666f88e6edb1816010194	nemotron-bolt
 lfm	main	staging	LiquidAI/LFM2.5-24B-A2B-GGUF	LFM2.5-24B-A2B-Q8_0.gguf	25493732640	f09bf094a8a138c5b645598ca1abb6696a0fde26662d7af649b0713fdef330b6	lfm25
 mcv	main	staging	openbmb/MiniCPM-V-4.7-35B-A3B-gguf	MiniCPM-V-4_7-35B-A3B-Q6_K.gguf	28513556640	fcbe98ad681730bc66828591c34761c2c266d54d4ffe7c0ae35e54e3ee7b4343	minicpm-v47
 mcv	mmproj	staging	openbmb/MiniCPM-V-4.7-35B-A3B-gguf	mmproj-model-f16.gguf	1119575840	bff3b688e14c300eca273092c37c50a0ddfcc2054e079af1a0480edeed5d20f1	minicpm-v47

@@ -76,7 +76,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 | `fn` | Qwen3.8-Flash-Next Coder 가지치기 (IQ1_M) | Qwen (2026-08-24) · ISTA-DASLab 압축 | 원본 125B · 6B (+51B n-gram 임베딩, 4B MTP) 중 전문가 절반 제거 | 58.4GB | 30.2G (+28.8GB mmap) | 1.89비트. 표준 시험 실패(`Array(n).map` 빈 배열 버그) - 실험용. 원본 라이선스 주의 |
 | `ff` | Qwen3.8-Flash-Next 전체판 (IQ3_XXS) | Qwen (2026-08-24) · ISTA-DASLab 압축 | 125B · 6B (+51B n-gram 임베딩, 4B MTP) | 75.8GB | 46.5G (+28.8GB mmap) | 표준 시험 통과(`fn` 은 실패). RAM 여유가 가장 빠듯하다(시험 중 최저 11.6G). 비교용. 원본 라이선스 주의 |
 | `q38` | Qwen3.8-27B (UD-Q6_K, MTP) | Qwen (2026-08-05) | 27B · 27B (dense) | 22.0GB | 27.7G | 생각 모델(서버에서 끔). 생성 24 t/s, 읽기 300 t/s 로 느리다. 비교용 |
-| `aw` | Qwen-AgentWorld-35B-A3B (UD-Q6_K) | Qwen (2026-06-22) | 35B · 3B | 29.3GB | 28.9G | **세계 모델 - 코딩 에이전트용 아님**. 비교용 |
+| `aw` | Qwen-AgentWorld-35B-A3B (UD-Q6_K) | Qwen (2026-06-22) | 35B · 3B | 29.3GB | 28.9G | **세계 모델 — 코딩 에이전트용 아님**. 비교용 |
 | `c7` | Qwen2.5-Coder-7B-Instruct (Q8_0) | Qwen (2024-09-17) | 7B · 7B (dense) | 8.1GB | 9.6G | 옛 세대 기준선, 직접 변환, 문맥 32K. 표준 시험 통과 |
 | `c7r` | c7 + React LoRA 「r4mlp」 | 직접 학습 (2026-06-27), 베이스는 Qwen | 7B · 7B + LoRA | 8.1GB (+어댑터 80MB) | 9.6G | 직접 학습한 LoRA 를 붙이는 예시 - 어댑터 파일은 비공개. 문맥 32K |
 | `c1` | Qwen2.5-Coder-1.5B-Instruct (F16) | Qwen (2024-09-18) | 1.5B · 1.5B (dense) | 3.1GB | 4.3G | 속도 기준선: 읽기 3045 t/s 로 가장 빠르나 표준 시험 실패. 직접 변환, 문맥 32K |

@@ -13,7 +13,7 @@ AMD Strix Halo 리눅스 서버에서 llama.cpp 를 router 모드로 돌리고, 
 Windows PC                                   Strix Halo 서버
  opencode  --HTTP /v1 + API 키-->  :8080  llama-server (router 모드, llama.cpp b11701 / Vulkan)
  (provider "halo")                          └ 요청의 model 이름으로 모델 선택 (한 번에 1개, 교체 17~80초)
-                                              15종: cn q36 mg orn mel bolt lfm / fn ff q38 aw c7 c7r c1 / (mcv 추가 중)
+                                              15종: cn q36 mg orn mel bolt lfm mcv / fn ff q38 aw c7 c7r c1
 ```
 
 - **서버**: llama.cpp b11701(공식 사전빌드, Vulkan 백엔드)의 router 모드. AMD Strix Halo / Radeon 8060S, 64GB 통합 메모리 중 56GB 를 GPU 공유 메모리(GTT)로 쓴다. 포트 8080, API 키 인증, 모델은 한 번에 하나만 올리고 요청의 `model` 이름에 따라 자동 교체한다.
@@ -63,7 +63,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 ## 15개 모델
 
-서버(router)에서 고를 수 있는 모델 전부. 앞의 7종(`cn` `q36` `mg` `orn` `mel` `bolt` `lfm`)이 일반 사용 후보, 다음 7종(`fn` `ff` `q38` `aw` `c7` `c7r` `c1`)은 실험·비교·기준선용, 마지막 1종(`mcv`)은 추가 중이다.
+서버(router)에서 고를 수 있는 모델 전부. 앞의 8종(`cn` `q36` `mg` `orn` `mel` `bolt` `lfm` `mcv`)이 일반 사용 후보(`mcv` 는 이미지·영상용), 나머지 7종(`fn` `ff` `q38` `aw` `c7` `c7r` `c1`)은 실험·비교·기준선용이다. 15종 모두 표준 시험을 마쳤다.
 
 | 약어 | 풀네임 | 발표처(공개) | 파라미터(전체·활성) | 필요 메모리(파일) | 실측 점유(GTT) | 특징 |
 |---|---|---|---|---|---|---|
@@ -71,7 +71,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 | `q36` | Qwen3.6-35B-A3B (UD-Q6_K, MTP) | Qwen (2026-04-15) | 35B · 3B | 30.0GB | 30.7G | 범용 MoE. 생성 91 t/s. 테트리스 5/5, 큰 과제(갤러그)에서는 시작 직후 멈춤. 표준 시험은 1/2회 통과(채점이 확률적) |
 | `mg` | Muse Glimmer 30B (Q4_K_XL, DFlash) | Meta (2026-08-09) | 30B · 30B (dense) | 19.7GB (+초안 1.6GB) | 22.7G | 에이전트용 dense. 생성 26 t/s 로 느리지만 테트리스·갤러그 완성도 1위. 생각 강도 low/xhigh |
 | `orn` | Ornith-1.5-35B-A3B (Q6_K, MTP) | ornith-ai (2026-08-18) | 35B · 3B | 29.2GB | 30.0G | 추론 모델(서버에서 생각 끔). 생성 81 t/s. 팀 작업을 성실히 돌리나 갤러그 조작 불가 - 판단 보류 |
-| `mel` | Mellum2.1-12B-A2.5B Thinking (Q8_0) | JetBrains (2026-09-20) | 12B · 2.5B | 12.9GB | 13.4G | 코딩 에이전트용 생각 모델(항상 켜짐). **b11701 에서 생성 17.9 t/s, 읽기 524 t/s 로 느려짐(조사 중)** - b11539 에서는 84.7 / 2008. 실전 과제 미실시 |
+| `mel` | Mellum2.1-12B-A2.5B Thinking (Q8_0) | JetBrains (2026-09-20) | 12B · 2.5B | 12.9GB | 13.4G | 코딩 에이전트용 생각 모델(항상 켜짐). **b11701 에서 생성 17.9 t/s, 읽기 524 t/s 로 4~5배 느려진다** - llama.cpp PR #30584 가 일부 연산을 GPU(Vulkan) 대신 CPU 로 보내기 때문이며 b11539 에서는 84.7 / 2008 이었다. 주로 쓰면 b11539 가 안전하다. 실전 과제 미실시 |
 | `bolt` | NVIDIA Nemotron 3.5 Bolt 74B-A9B 24GB (2비트 QAT, DFlash) | NVIDIA (2026-10-07) | 74B · 9B | 22.0GB (+mmproj 1.7GB, 초안 1.0GB) | 28.8G | Mamba-2+Transformer LatentMoE, 도구 호출·터미널 학습, 이미지·영상 입력. 생성 54 t/s(생각 끔, 서버 기본. 켜면 46 t/s 에 추론 약 1.25만 자). **llama.cpp b11701 이상 필요**. variant fast/think. 실전 과제 미실시 |
 | `lfm` | LFM2.5-24B-A2B (Q8_0) | Liquid AI (2026-10-09) | 24B · 2B | 25.5GB | 25.4G | 하이브리드 MoE, 에이전트 도구 사용 중심 학습. 생성 75 t/s, 읽기 1834 t/s 로 빠르나 생각이 기본으로 켜져(약 1.34만 자) 첫 응답이 길다. 실전 과제 미실시 |
 | `fn` | Qwen3.8-Flash-Next Coder 가지치기 (IQ1_M) | Qwen (2026-08-24) · ISTA-DASLab 압축 | 원본 125B · 6B (+51B n-gram 임베딩, 4B MTP) 중 전문가 절반 제거 | 58.4GB | 30.2G (+28.8GB mmap) | 1.89비트. 표준 시험 0/2회(`Array(n).map` 빈 배열 버그) - 실험용. 원본 라이선스 주의 |
@@ -81,10 +81,10 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 | `c7` | Qwen2.5-Coder-7B-Instruct (Q8_0) | Qwen (2024-09-17) | 7B · 7B (dense) | 8.1GB | 9.6G | 옛 세대 기준선, 직접 변환, 문맥 32K. 표준 시험 2/2회 통과 |
 | `c7r` | c7 + React LoRA 「r4mlp」 | 직접 학습 (2026-06-27), 베이스는 Qwen | 7B · 7B + LoRA | 8.1GB (+어댑터 80MB) | 9.6G | 직접 학습한 LoRA 를 붙이는 예시 - 어댑터 파일은 비공개. 문맥 32K. 표준 시험 1/2회 |
 | `c1` | Qwen2.5-Coder-1.5B-Instruct (F16) | Qwen (2024-09-18) | 1.5B · 1.5B (dense) | 3.1GB | 4.3G | 속도 기준선: 읽기 3057 t/s 로 가장 빠르나 표준 시험 0/2회. 직접 변환, 문맥 32K |
-| `mcv` | MiniCPM-V 4.7 35B-A3B (Q6_K, 비전) | OpenBMB (2026-10-06) | 35B · 3B | 28.5GB (+mmproj 1.1GB, 초안 0.42GB) | **추가 중 — 실측 전** | 시리즈 첫 MoE, 이미지·영상 이해 특화. 파일은 받아 대조했고 router 에 올렸다(측정 전). **llama.cpp b11701 이상 필요** |
+| `mcv` | MiniCPM-V 4.7 35B-A3B (Q6_K, 비전) | OpenBMB (2026-10-06) | 35B · 3B | 28.5GB (+mmproj 1.1GB, 초안 0.42GB) | 32.2G | 시리즈 첫 MoE, 이미지·영상 이해 특화. DSpark 로 생성 90 t/s(수락 75%), 읽기 1052 t/s. **llama.cpp b11701 이상 필요**. 실전 과제 미실시 |
 
 - 공개일은 제작사의 첫 Hugging Face 저장소 생성일 기준이다. 생성 속도와 GTT 는 표준 시험(2026-10-17, llama.cpp b11701, 같은 하네스 · GPU · 단독 실행)의 값이다. 표준 시험의 채점은 확률적이라 통과 횟수로 적었고(표본 2~3회), 평가는 직접 플레이해 본 판정이며 n=1이다.
-- 서버 엔진을 b11539 에서 b11701 로 올렸다(`bolt` 와 `mcv` 가 필요로 한다). 같은 모델의 속도는 두 엔진에서 거의 같았지만 `mel` 만 크게 느려졌다([엔진 비교](docs/benchmarks.md#엔진-비교-b11539-대-b11701)).
+- 서버 엔진을 b11539 에서 b11701 로 올렸다(`bolt` 와 `mcv` 가 필요로 한다). 같은 모델의 속도는 두 엔진에서 거의 같았지만 `mel` 만 4~5배 느려졌다. 원인은 llama.cpp PR #30584(Mellum 정밀도 처리)로 밝혀졌다 - 퍼플렉서티는 두 엔진에서 같아서 이 서버에서는 속도만 잃는다([엔진 비교와 원인](docs/benchmarks.md#mel-이-b11701-에서-45배-느려진-이유)). `mel` 을 주로 쓰면 b11539 가 안전하고, `bolt`·`mcv` 를 쓰려면 b11701 이어야 한다(엔진은 router 단위).
 - 함수 벤치(테트리스 함수 6문제)는 거의 모두 6/6 이라 모델 차이가 보이지 않았다 - 차이는 끝까지 만든 결과물을 사람이 돌려 볼 때 드러났다.
 
 전체 제원·sha256·router 설정은 [docs/models.md](docs/models.md), 시험 방법과 결과는 [docs/benchmarks.md](docs/benchmarks.md).

@@ -42,7 +42,7 @@
 | `c7r` | `c7` + 직접 학습한 React LoRA | 베이스 Apache-2.0. 어댑터는 직접 만든 비공개 파일이며 이 레포에 포함하지 않는다 | (공개 링크 없음) |
 | `c1` | Qwen2.5-Coder-1.5B-Instruct (직접 GGUF 변환) | Apache-2.0 | https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct |
 | `lfm` | LFM2.5-24B-A2B (Liquid AI) | LFM Open License 1.0 - 연 매출 1천만 달러(USD 10M) 미만이면 무료 상업 이용. 조건 전문은 모델 페이지의 LICENSE | https://huggingface.co/LiquidAI/LFM2.5-24B-A2B-GGUF |
-| `mcv` (추가 중) | MiniCPM-V 4.7 35B-A3B (OpenBMB) | Apache-2.0 (초안 모델 DSpark 도 Apache-2.0) | https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B-gguf |
+| `mcv` | MiniCPM-V 4.7 35B-A3B (OpenBMB) | Apache-2.0 (초안 모델 DSpark 도 Apache-2.0) | https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B-gguf |
 
 주석:
 - **`fn` 과 `ff`**: 두 파일 모두 `Qwen/Qwen3.8-Flash-Next` 에서 만든 압축판이다. GGUF 저장소(ISTA-DASLab)는 Apache-2.0 으로 표기하지만, 원본의 모델 카드는 **Qwen Community License 1.0** 이다 - https://huggingface.co/Qwen/Qwen3.8-Flash-Next/blob/main/LICENSE (예: 제3자에게 모델 추론 접근을 제공하는 MaaS 사업이나 AI 코딩·업무 보조 제품 사업은 상업 목적 사용에 Qwen 의 별도 라이선스가 필요하고, 제3자에게 제공하지 않는 내부 사용은 예외라고 적혀 있다). 두 곳을 모두 확인하고 더 엄격한 쪽을 따른다.

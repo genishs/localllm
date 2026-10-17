@@ -7,7 +7,7 @@ llama.cpp 의 `llama-server` **router 모드** 하나가 포트 8080 에서 모�
 |---|---|
 | [`server/llm-router.sh`](../server/llm-router.sh) | router 서버 시작/중지/상태 |
 | [`server/llm-presets.ini`](../server/llm-presets.ini) | 모델 목록과 모델별 옵션 |
-| [`server/models.tsv`](../server/models.tsv) | 모델 파일의 출처·크기·sha256 (다시 받을 때 사용). `status`: `current` 사용 중 / `compare` 비교용 / `staging` 추가 중 / `local-convert` 직접 변환한 파일(내려받는 파일이 아님) |
+| [`server/models.tsv`](../server/models.tsv) | 모델 파일의 출처·크기·sha256 (다시 받을 때 사용). `status`: `current` 사용 중 / `compare` 비교용 / `staging` 추가 중(지금은 없음) / `local-convert` 직접 변환한 파일(내려받는 파일이 아님) |
 | [`server/llm-allow.sh`](../server/llm-allow.sh) | 방화벽에서 PC 한 대(IP)만 8080 에 열기 |
 | [`server/lid-ac-ignore.sh`](../server/lid-ac-ignore.sh) | 전원이 꽂힌 노트북은 덮개를 닫아도 절전하지 않게 |
 
@@ -147,7 +147,7 @@ chat-template-kwargs = {"enable_thinking":false}
 # GTT 47.5G / 56G
 ```
 
-- 올라간 모델의 GTT 가 대략 이 값이어야 한다: `cn` 47~48G · `ff` 약 46.5G · `q36`/`orn`/`fn` 약 30G · `aw`/`bolt` 약 29G · `q38` 약 28G · `lfm` 약 25G · `mg` 약 22.5G · `mel` 약 13G · `c7`/`c7r` 약 9.6G · `c1` 약 4.3G.
+- 올라간 모델의 GTT 가 대략 이 값이어야 한다: `cn` 47~48G · `ff` 약 46.5G · `q36`/`orn`/`fn` 약 30G · `mcv` 약 32G · `aw`/`bolt` 약 29G · `q38` 약 28G · `lfm` 약 25G · `mg` 약 22.5G · `mel` 약 13G · `c7`/`c7r` 약 9.6G · `c1` 약 4.3G.
 - 모델이 `loaded` 인데 **GTT 가 0.0G** 이면 GPU 를 못 쓰는 것이다 -> [troubleshooting.md](troubleshooting.md#재부팅-후-gpu-를-못-쓰고-cpu-로-돈다).
 - 직접 읽기: `awk '{printf "%.1fG\n",$1/1073741824}' /sys/class/drm/card*/device/mem_info_gtt_used` (카드가 여럿이면 GPU 쪽 카드의 값을 본다).
 

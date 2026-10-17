@@ -41,7 +41,7 @@
 | `c7` | Qwen2.5-Coder-7B-Instruct (직접 GGUF 변환) | Apache-2.0 | https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct |
 | `c7r` | `c7` + 직접 학습한 React LoRA | 베이스 Apache-2.0. 어댑터는 직접 만든 비공개 파일이며 이 레포에 포함하지 않는다 | (공개 링크 없음) |
 | `c1` | Qwen2.5-Coder-1.5B-Instruct (직접 GGUF 변환) | Apache-2.0 | https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct |
-| `lfm` (추가 중) | LFM2.5-24B-A2B (Liquid AI) | LFM Open License 1.0 - 연 매출 1천만 달러(USD 10M) 미만이면 무료 상업 이용. 조건 전문은 모델 페이지의 LICENSE | https://huggingface.co/LiquidAI/LFM2.5-24B-A2B-GGUF |
+| `lfm` | LFM2.5-24B-A2B (Liquid AI) | LFM Open License 1.0 - 연 매출 1천만 달러(USD 10M) 미만이면 무료 상업 이용. 조건 전문은 모델 페이지의 LICENSE | https://huggingface.co/LiquidAI/LFM2.5-24B-A2B-GGUF |
 | `mcv` (추가 중) | MiniCPM-V 4.7 35B-A3B (OpenBMB) | Apache-2.0 (초안 모델 DSpark 도 Apache-2.0) | https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B-gguf |
 
 주석:

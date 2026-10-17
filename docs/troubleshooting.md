@@ -76,6 +76,26 @@
 - opencode 의 기본값은 모든 수정·명령을 승인 없이 허용하는 것이다. 설치 스크립트는 설정에 `permission: {edit: ask, bash: ask}` 를 쓰고, 이미 `permission` 이 있으면 그대로 둔다.
 - `opencode --auto` 는 「deny 가 아닌 권한을 전부 자동 승인」한다. 위 설정은 `ask` 뿐이라 `--auto` 를 쓰면 전부 풀린다 - 신뢰하는 작업 폴더에서만 쓴다.
 
+## 업데이트 안내가 뜨거나 업데이트가 실패할 때
+
+- **증상**: opencode 를 켜면 새 버전이 있다는 안내가 뜨고, 업데이트를 시도하면(`opencode upgrade`, 또는 「Install anyways?」에 Yes) 실패한다 - `Unknown installation method: unknown`.
+- **원인**: 설치 스크립트는 패키지 관리자(npm·brew·scoop 등)가 아니라 GitHub 릴리스 zip 을 `%LOCALAPPDATA%\Programs\opencode` 에 풀어 설치한다. opencode 는 실행 파일 위치와 패키지 관리자의 설치 목록으로 설치 방식을 알아내는데(v1.18.35 바이너리의 코드로 확인) 이 경우는 어디에도 해당하지 않아 `unknown` 이 되고, `unknown` 은 업데이트 방법이 없다. 그래도 시작할 때마다 GitHub 에서 최신 버전을 조회해, 새 버전이 마이너 이상으로 다르면 안내를 띄운다(v1.18.35 에 대해 v1.19.x 가 나온 시점부터 보인다).
+- **대책**: 설치 스크립트가 업데이트 확인 자체를 끈다. 두 곳에 쓴다.
+  - `opencode.json` 에 `"autoupdate": false`. 스키마가 받는 값은 `true` / `false` / `"notify"` 이고 `false` 면 확인을 건너뛴다.
+  - 사용자 환경변수 `OPENCODE_DISABLE_AUTOUPDATE=true` (값은 `true` 또는 `1` 만 인식한다). 설정 파일의 `autoupdate` 는 전역 설정 폴더(`%USERPROFILE%\.config\opencode\`)의 파일에서만 읽히고, `OPENCODE_CONFIG` 로 다른 곳의 파일을 가리키면 거기 적힌 값은 무시된다. 환경변수는 설정 파일 위치와 상관없이 듣는다.
+  - 바탕화면 `opencode-local.bat` 는 고치지 않았다. `LLM_KEY`·`OPENCODE_CONFIG` 도 사용자 환경변수로 받으므로 같은 방식이다.
+- **이미 설치한 PC**: 설치 스크립트를 한 번 더 실행하고(키·주소는 기억돼 있다) 열려 있는 opencode 를 다시 시작한다. 기존 설정의 다른 키는 그대로 두고 `autoupdate` 만 더하며, 바꾸기 전 파일은 `.bak-날짜` 로 남는다. 손으로 하려면: opencode.json 에 `"autoupdate": false` 를 더하고 PowerShell 에서 `[Environment]::SetEnvironmentVariable('OPENCODE_DISABLE_AUTOUPDATE','true','User')` 후 새 터미널을 연다.
+- **확인한 것과 못 한 것**: Linux 용 v1.18.35 로 TUI 를 띄워 `api.github.com` 으로 나가는 연결을 세었다. 기본 설정은 연결이 나가고, `autoupdate: false`(전역 설정) 또는 `OPENCODE_DISABLE_AUTOUPDATE` 중 하나만 있어도 나가지 않았다. `OPENCODE_CONFIG` 로 다른 폴더의 파일에 `autoupdate: false` 만 둔 경우는 연결이 나갔다. Windows 에서 같은 시험은 하지 않았다(같은 코드 경로로 읽힌다).
+- **버전을 올리고 싶을 때**: 이 구성은 서버와 검증한 v1.18.35 로 고정이다. 올리려면 `client/windows/install.ps1` 의 두 값을 고친다.
+  1. 올릴 릴리스를 정한다: https://github.com/anomalyco/opencode/releases
+  2. `$Ver = "v1.18.35"` 를 그 태그로 바꾼다.
+  3. `$Sha` 의 두 항목(`opencode-windows-x64.zip`, `opencode-windows-x64-baseline.zip`)을 그 릴리스의 sha256 으로 바꾼다. 값은 릴리스 자산의 digest(`https://api.github.com/repos/anomalyco/opencode/releases/tags/<태그>` 의 `assets[].digest`)에서 얻고, zip 을 받아 `Get-FileHash <zip> -Algorithm SHA256` 로 직접 계산한 값과 같은지 대조한다.
+  4. 이 레포의 설정(`enabled_providers` · `permission` · `autoupdate` 등)은 v1.18.35 스키마로 확인한 것이다. 새 버전에서 키 이름이 바뀌었는지 보고, 서버와 붙는지 시험한 뒤 올린다.
+  5. `v1.18.35` 를 쓴 문서(`README.md`, `docs/hardware.md`, `THIRD_PARTY_NOTICES.md`, 이 문서)도 함께 고친다: `grep -rn 1.18.35 .`
+  6. 설치 스크립트를 다시 실행하면 `$Ver` 와 다른 버전이 설치돼 있는 PC 는 새 버전으로 교체된다(「found a different or broken opencode」).
+- **하지 말 것**: `opencode upgrade` 는 이 설치에서 실패하고, `--method` 로 방식을 강제하면 설치 스크립트가 만든 것과 다른 위치에 별도 복사본이 생길 수 있다.
+- 업데이트 확인을 다시 켜고 싶다면 환경변수를 지우고 `autoupdate` 를 고친다. 단 설치 스크립트를 다시 실행하면 이 값은 또 꺼진다(스크립트가 관리하는 키다).
+
 ## 모델 다운로드: 크기가 맞아도 끝난 게 아니다
 
 - 병렬 Range 다운로더 중에는 **파일을 최종 크기로 미리 잡아 두는** 것이 있다. 크기만 보면 시작하자마자 「다 받았다」로 보인다(3분에 끝났다고 오판했으나 실제는 20분).

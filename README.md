@@ -50,7 +50,7 @@ irm https://raw.githubusercontent.com/genishs/localllm/main/client/windows/insta
 1. 서버 주소 입력(이전에 쓴 값이 기본값) -> 사용자 환경변수 `LLM_URL`.
 2. API 키 입력 -> `GET /v1/models` 로 확인(401 이면 최대 3번 다시 묻는다).
 3. opencode **v1.18.35** 설치 - GitHub 릴리스에서 받아 **sha256 검증**, 이 CPU 에서 안 돌면 baseline 빌드로 대체.
-4. 서버의 모델 목록으로 opencode 설정을 쓴다. 기존 `opencode.json` 이 있으면 **관리하는 키만 바꾸고**(`$schema` · `provider.halo` · `enabled_providers` · `share` · `model` · `permission`) 나머지(theme, keybinds, 다른 제공자 등)는 그대로 둔다. 외부 제공자는 차단(`enabled_providers: ["halo"]`)하고 공유는 끈다. `permission` 은 기존 값을 유지(없으면 수정·명령 모두 `ask`), 기본 모델은 쓰던 `halo/...` 모델이 서버에 있으면 유지하고 아니면 `halo/cn`. 모델마다 문맥 크기가 다르면 맞춰 쓴다(32K 모델은 32768). 바꾸기 전 설정은 `.bak-날짜` 로 백업하고, 쓰기 전에 JSON 을 다시 읽어 검증한다.
+4. 서버의 모델 목록으로 opencode 설정을 쓴다. 기존 `opencode.json` 이 있으면 **관리하는 키만 바꾸고**(`$schema` · `provider.halo` · `enabled_providers` · `share` · `autoupdate` · `model` · `permission`) 나머지(theme, keybinds, 다른 제공자 등)는 그대로 둔다. 외부 제공자는 차단(`enabled_providers: ["halo"]`)하고 공유는 끈다. 자동 업데이트도 끈다(`autoupdate: false` + 사용자 환경변수 `OPENCODE_DISABLE_AUTOUPDATE=true`, [아래](#업데이트-안내가-뜨거나-업데이트가-실패할-때)). `permission` 은 기존 값을 유지(없으면 수정·명령 모두 `ask`), 기본 모델은 쓰던 `halo/...` 모델이 서버에 있으면 유지하고 아니면 `halo/cn`. 모델마다 문맥 크기가 다르면 맞춰 쓴다(32K 모델은 32768). 바꾸기 전 설정은 `.bak-날짜` 로 백업하고, 쓰기 전에 JSON 을 다시 읽어 검증한다.
 5. 작업 폴더 선택 + 바탕화면 실행 파일 `opencode-local.bat`.
 6. 사용법 안내, 바로 시작할지 묻기.
 
@@ -102,6 +102,14 @@ opencode models halo              # 쓸 수 있는 모델 목록
 - **Glimmer(`mg`) 생각 강도**: 세션 안에서 `Ctrl+T` 또는 `Ctrl+P` -> 「Switch model variant」 -> `low` / `xhigh`. 모델을 다시 올리지 않는다.
 - **Bolt(`bolt`) 생각 켜기**: 같은 방법으로 `fast`(생각 끔, 기본) / `think`(켬). 표준 시험에서 끔은 첫 응답 24.0초 · 53.7 t/s, 켬은 추론 약 1.25만 자가 붙어 103.5초 · 46.3 t/s 였다.
 - 바탕화면 `opencode-local.bat` 는 작업 폴더에서 opencode 를 실행한다. 인자가 그대로 넘어간다: `opencode-local.bat --auto -m halo/q36`.
+
+## 업데이트 안내가 뜨거나 업데이트가 실패할 때
+
+- **원인**: 설치 스크립트는 npm·brew 같은 패키지 관리자가 아니라 GitHub 릴리스 zip 으로 opencode 를 설치한다. opencode 는 설치 방식을 알아내지 못해(`unknown`) 스스로 업데이트할 수 없다 - `opencode upgrade` 는 `Unknown installation method` 로 실패한다. 그런데도 새 버전이 나오면 안내는 띄운다.
+- **자동 업데이트 끄기**: 설치 스크립트가 업데이트 확인 자체를 끈다 - `opencode.json` 의 `"autoupdate": false` 와 사용자 환경변수 `OPENCODE_DISABLE_AUTOUPDATE=true`. 서버와 검증한 v1.18.35 를 그대로 쓰기 위해서다. 전에 설치한 PC 에서 안내가 뜬다면 **설치 스크립트를 한 번 더 실행**하고 열려 있는 opencode 를 다시 시작한다(다른 설정은 그대로 둔다).
+- **버전을 올리고 싶을 때**: `install.ps1` 의 `$Ver`(태그)와 `$Sha`(zip 2종의 sha256)를 새 릴리스 값으로 고친 뒤 다시 실행하면 새 버전으로 교체한다. `opencode upgrade` 는 쓰지 않는다.
+
+받은 증거와 단계별 절차: [docs/troubleshooting.md](docs/troubleshooting.md#업데이트-안내가-뜨거나-업데이트가-실패할-때).
 
 ## 문서
 

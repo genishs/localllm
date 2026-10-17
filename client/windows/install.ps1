@@ -8,7 +8,12 @@
 #
 # Steps (safe to re-run):
 #   1 server address   2 API key + connection test   3 opencode v1.18.35 (pinned, sha256-verified)
-#   4 opencode config  5 work folder + desktop launcher   6 usage summary / start
+#   4 opencode config (auto-update off)   5 work folder + desktop launcher   6 usage summary / start
+#
+# Auto-update is switched off on purpose: opencode is installed from the release zip, so it cannot
+# upgrade itself (its update notice would only lead to a failing upgrade) and the pinned version is the
+# one verified against the server. It is turned off in two places - "autoupdate": false in the opencode
+# config and the user env var OPENCODE_DISABLE_AUTOUPDATE (see README, "update notice" section).
 #
 # Third-party software: opencode (https://github.com/anomalyco/opencode) is MIT-licensed software
 # by its authors. This script downloads the official release binary from GitHub and verifies its
@@ -301,7 +306,7 @@ if (Test-Path $cfg) {
   }
 }
 if ($null -eq $old) { $old = [ordered]@{} }
-$managed = @('$schema', 'enabled_providers', 'provider', 'model', 'share', 'permission')
+$managed = @('$schema', 'enabled_providers', 'provider', 'model', 'share', 'autoupdate', 'permission')
 
 # the model list comes from the server; context/names come from the table above
 $models = [ordered]@{}
@@ -361,6 +366,7 @@ $conf["enabled_providers"] = @("halo")
 $conf["provider"]          = $prov
 $conf["model"]             = $model
 $conf["share"]             = "disabled"
+$conf["autoupdate"]        = $false     # zip install cannot self-update; keep the pinned, server-verified version
 $conf["permission"]        = $perm
 
 $json = $conf | ConvertTo-Json -Depth 30
@@ -368,6 +374,7 @@ $chk = $json | ConvertFrom-Json     # re-parse before writing: never leave a bro
 if (@($chk.provider.halo.models.PSObject.Properties).Count -ne $ids.Count) { throw "config check failed (model count)" }
 if ($chk.provider.halo.options.apiKey -ne '{env:LLM_KEY}') { throw "config check failed (apiKey)" }
 if (@($chk.enabled_providers).Count -ne 1 -or @($chk.enabled_providers)[0] -ne "halo") { throw "config check failed (enabled_providers)" }
+if ($chk.autoupdate -ne $false) { throw "config check failed (autoupdate)" }
 $have = @($chk.PSObject.Properties.Name)
 foreach ($k in $old.Keys) { if ($managed -notcontains $k -and $have -notcontains $k) { throw "config check failed (lost key $k)" } }
 if (@($chk.provider.PSObject.Properties).Count -ne $prov.Count) { throw "config check failed (providers)" }
@@ -379,7 +386,10 @@ if ($null -ne $oldRaw -and $oldRaw.Trim() -ne $json.Trim()) {
 }
 [IO.File]::WriteAllText($cfg, $json, (New-Object Text.UTF8Encoding($false)))
 Set-EnvVar "OPENCODE_CONFIG" $cfg
-Ok "wrote $cfg  (provider halo, $($ids.Count) models, external providers off, share off)"
+# opencode reads "autoupdate" only from its global config (~/.config/opencode/), not from a file named by
+# OPENCODE_CONFIG that lives elsewhere. The env var works whatever the config path is (accepted values: true or 1).
+Set-EnvVar "OPENCODE_DISABLE_AUTOUPDATE" "true"
+Ok "wrote $cfg  (provider halo, $($ids.Count) models, external providers off, share off, auto-update off)"
 $kept = @(); foreach ($k in $old.Keys) { if ($managed -notcontains $k) { $kept += $k } }
 foreach ($k in $prov.Keys) { if ($k -ne "halo") { $kept += "provider.$k" } }
 if ($kept.Count -gt 0) { Info ("kept your other settings: " + ($kept -join ", ")) }
@@ -425,6 +435,7 @@ if ($ids -contains "mg") { Write-Host "   Glimmer (mg) thinking: Ctrl+T or Ctrl+
 if ($ids -contains "bolt") { Write-Host "   Bolt (bolt) thinking: Ctrl+T or Ctrl+P -> 'Switch model variant' -> fast (off, default) / think (on)" }
 Write-Host "   launcher: double-click opencode-local.bat on the desktop (extra arguments work: opencode-local.bat --auto -m halo/$pick)"
 Write-Host "   server  : $url   (API key is stored in user env LLM_KEY and is not shown)"
+Write-Host "   updates : auto-update is off (the version verified with the server, $Ver, is kept)"
 Write-Host "   new terminals have opencode on PATH; this window already does."
 Write-Host ""
 if (Ask-YesNo "Start opencode now?" $true) {
